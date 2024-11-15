@@ -1,0 +1,379 @@
+package com.programming;
+import java.util.Scanner;
+import java.util.Arrays;
+import java.util.ArrayList;
+
+public class DeadlockDetectionAlgo
+{
+    public static void main(String[] args)
+    {
+        ArrayList<Integer> safeSequence = new ArrayList<>();
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter total number of processes:");
+        int totalNumberOfProcesses = scanner.nextInt();
+        System.out.println("Enter total type of resources:");
+        int totalTypesOfResources = scanner.nextInt();
+        int[][] allocatedMatrix = new int[totalNumberOfProcesses][totalTypesOfResources+1];
+        for(int i = 0 ; i<totalNumberOfProcesses;i++)
+        {
+            System.out.println("Enter process Id:");
+            allocatedMatrix[i][0] = scanner.nextInt();
+            for(int j = 1 ; j <= totalTypesOfResources ; j++)
+            {
+                System.out.println("For process with Id "+allocatedMatrix[i][0]+", enter allocated instance of R"+(j-1)+":");
+                allocatedMatrix[i][j] = scanner.nextInt();
+            }
+        }
+
+
+
+        int[][] requested = new int[totalNumberOfProcesses][totalTypesOfResources+1];
+        for(int i = 0 ; i < totalNumberOfProcesses ; i++)
+        {
+            requested[i][0] = allocatedMatrix[i][0];
+            for(int j = 1 ; j <= totalTypesOfResources ; j++)
+            {
+                System.out.println("For process with Id "+allocatedMatrix[i][0]+", enter requested instance of R"+j+":");
+                requested[i][j] = scanner.nextInt();
+            }
+        }
+
+        int[] totalResources =  new int[totalTypesOfResources];
+        for(int i = 0 ; i< totalTypesOfResources;i++)
+        {
+            System.out.println("Enter total resources of R"+i+":");
+            totalResources[i] = scanner.nextInt();
+        }
+
+
+        int[] allocated = new int[totalTypesOfResources];
+
+        //Calculate allocated
+        for(int[] row:allocatedMatrix)
+        {
+            for(int i = 1; i <= totalTypesOfResources;i++)
+            {
+                allocated[i-1] += row[i];
+            }
+        }
+
+        int[] available = new int[totalTypesOfResources];
+        for(int i = 0 ; i < totalTypesOfResources ;i++)
+        {
+            available[i] = totalResources[i] - allocated[i];
+        }
+
+        boolean[] finish = new boolean[totalNumberOfProcesses];
+
+        System.out.println("Allocated Matrix:");
+        for(int[] element:allocatedMatrix)
+            System.out.println(Arrays.toString(element));
+
+        System.out.println("Requested Matrix:");
+        for(int[] element:requested)
+            System.out.println(Arrays.toString(element));
+
+        System.out.println("Total resources:"+Arrays.toString(totalResources));
+
+        System.out.println("Allocated Resources:"+Arrays.toString(allocated));
+
+        System.out.println("Available Resources:"+Arrays.toString(available));
+
+        boolean flag;
+        for(int i = 0 ; i < totalNumberOfProcesses ; i++)
+        {
+            flag = false;
+            for(int j = 1 ; j <= totalTypesOfResources ;j++)
+            {
+                if(allocatedMatrix[i][j]!=0)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if(flag)
+                finish[i] = false;
+            else
+                finish[i] = true;
+        }
+
+        flag = true;
+        boolean flag2 = true;
+        while(flag)
+        {
+            flag = false;
+            for(int i = 0 ; i < totalNumberOfProcesses ; i++)
+            {
+                if(!finish[i])
+                {
+                    for (int j = 1; j <= totalTypesOfResources; j++)
+                    {
+                        if (requested[i][j] <= available[j - 1])
+                            flag2 = true;
+                        else
+                        {
+                            flag2 = false;
+                            break;
+                        }
+                    }
+                    if (flag2)
+                    {
+                        flag = true;
+                        for (int j = 0 ; j < totalTypesOfResources ; j++)
+                            available[j] += allocatedMatrix[i][j+1];
+                        finish[i] = true;
+                        System.out.println("Completed execution of process with Id "+requested[i][0]+".Available Now:"+Arrays.toString(available));
+                        safeSequence.add(requested[i][0]);
+                    }
+                }
+            }
+        }
+
+        for(boolean element:finish)
+        {
+            if(!element)
+            {
+                System.out.println("The system is in deadlock.Processes that are in deadlock are:-");
+                for(int[] row:requested)
+                {
+                    if(!safeSequence.contains(row[0]))
+                        System.out.println(row[0]);
+                }
+                System.out.println("Finish:"+Arrays.toString(finish));
+                System.exit(1);
+            }
+        }
+
+        System.out.println("The system is in safe state.Safe sequence:"+safeSequence);
+        
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 1. Concept Explanation: Deadlock Detection and Prevention
+// Deadlock is a situation where two or more processes are unable to proceed because each is waiting for resources held by the other. A deadlock detection algorithm identifies whether deadlock has occurred in the system, and if so, identifies which processes are involved.
+
+// The provided code is an implementation of deadlock detection using a variation of the banker's algorithm, where the system attempts to find a safe sequence of processes by checking if the requested resources of any process can be allocated based on the available resources. If not, the process is marked as part of a deadlock.
+
+// 2. Algorithm Explanation:
+// This deadlock detection algorithm works by:
+
+// Initialization of Resources:
+
+// The algorithm first gathers input on the number of processes and resource types.
+// It then gathers two matrices: the allocated matrix (how many resources are currently allocated to each process) and the requested matrix (how many resources each process still needs).
+// It also gathers the total available resources for each type.
+// Calculation of Available Resources:
+
+// From the allocated matrix and the total resources, it calculates the available resources by subtracting allocated resources from the total resources.
+// Process Execution Simulation:
+
+// The algorithm then tries to simulate the process execution. It goes through each process, checking if it can be allocated the resources it is requesting (i.e., if the available resources are enough to satisfy the requested resources for that process).
+// If a process can proceed, it is "finished," and its resources are added back to the available resources, updating the system’s state.
+// Deadlock Detection:
+
+// If no process can proceed in the current iteration (i.e., no processes have their requests satisfied), the algorithm determines that the system is in a deadlock state and identifies which processes are involved by comparing the safe sequence and the requested processes.
+// Explanation of Key Variables and Steps:
+// allocatedMatrix: Contains the number of resources currently allocated to each process.
+// requested: Contains the number of resources that each process still requests.
+// available: Contains the number of available resources that can be allocated to processes.
+// finish: Keeps track of whether a process has finished execution (i.e., whether it has been safely completed).
+// safeSequence: Holds the safe sequence of processes if one is found.
+// Flow of the Algorithm:
+// Initialization: Collect data on processes, resources, and their allocations.
+// Available Resources Calculation: Determine how many resources are available.
+// Safe Sequence Simulation: Try to allocate resources to processes in such a way that no deadlock occurs.
+// Deadlock Detection: If no process can proceed, the system is in deadlock, and the processes involved in the deadlock are displayed.
+// 3. Code Explanation (Line by Line):
+// java
+// Copy code
+// import java.util.Scanner;
+// import java.util.Arrays;
+// import java.util.ArrayList;
+
+// public class DeadlockDetectionAlgo {
+//     public static void main(String[] args) {
+//         ArrayList<Integer> safeSequence = new ArrayList<>();
+//         Scanner scanner = new Scanner(System.in);
+        
+//         System.out.println("Enter total number of processes:");
+//         int totalNumberOfProcesses = scanner.nextInt();
+//         System.out.println("Enter total type of resources:");
+//         int totalTypesOfResources = scanner.nextInt();
+// Input Setup: The program starts by accepting the number of processes and the types of resources from the user.
+// java
+// Copy code
+//         int[][] allocatedMatrix = new int[totalNumberOfProcesses][totalTypesOfResources+1];
+//         for(int i = 0 ; i<totalNumberOfProcesses; i++) {
+//             System.out.println("Enter process Id:");
+//             allocatedMatrix[i][0] = scanner.nextInt();
+//             for(int j = 1 ; j <= totalTypesOfResources ; j++) {
+//                 System.out.println("For process with Id "+allocatedMatrix[i][0]+", enter allocated instance of R"+(j-1)+":");
+//                 allocatedMatrix[i][j] = scanner.nextInt();
+//             }
+//         }
+// Allocated Matrix Input: The program reads the allocated resources for each process and stores them in a matrix.
+// java
+// Copy code
+//         int[][] requested = new int[totalNumberOfProcesses][totalTypesOfResources+1];
+//         for(int i = 0 ; i < totalNumberOfProcesses ; i++) {
+//             requested[i][0] = allocatedMatrix[i][0];
+//             for(int j = 1 ; j <= totalTypesOfResources ; j++) {
+//                 System.out.println("For process with Id "+allocatedMatrix[i][0]+", enter requested instance of R"+j+":");
+//                 requested[i][j] = scanner.nextInt();
+//             }
+//         }
+// Requested Matrix Input: The program reads the requested resources for each process and stores them in a matrix.
+// java
+// Copy code
+//         int[] totalResources =  new int[totalTypesOfResources];
+//         for(int i = 0 ; i< totalTypesOfResources; i++) {
+//             System.out.println("Enter total resources of R"+i+":");
+//             totalResources[i] = scanner.nextInt();
+//         }
+// Total Resources Input: The program reads the total number of each resource type available in the system.
+// java
+// Copy code
+//         int[] allocated = new int[totalTypesOfResources];
+//         for(int[] row:allocatedMatrix) {
+//             for(int i = 1; i <= totalTypesOfResources; i++) {
+//                 allocated[i-1] += row[i];
+//             }
+//         }
+// Calculating Allocated Resources: It computes the total allocated resources by summing up the values in the allocatedMatrix.
+// java
+// Copy code
+//         int[] available = new int[totalTypesOfResources];
+//         for(int i = 0 ; i < totalTypesOfResources ; i++) {
+//             available[i] = totalResources[i] - allocated[i];
+//         }
+// Available Resources Calculation: The program calculates the available resources by subtracting allocated resources from the total resources.
+// java
+// Copy code
+//         boolean[] finish = new boolean[totalNumberOfProcesses];
+//         for(int i = 0 ; i < totalNumberOfProcesses ; i++) {
+//             boolean flag = false;
+//             for(int j = 1 ; j <= totalTypesOfResources ; j++) {
+//                 if(allocatedMatrix[i][j] != 0) {
+//                     flag = true;
+//                     break;
+//                 }
+//             }
+//             finish[i] = !flag;
+//         }
+// Finish Array Initialization: The program initializes the finish array. It checks if any process has allocated resources. If a process has no allocated resources, it is marked as finished.
+// java
+// Copy code
+//         flag = true;
+//         boolean flag2;
+//         while(flag) {
+//             flag = false;
+//             for(int i = 0 ; i < totalNumberOfProcesses ; i++) {
+//                 if(!finish[i]) {
+//                     flag2 = true;
+//                     for(int j = 1; j <= totalTypesOfResources; j++) {
+//                         if(requested[i][j] > available[j-1]) {
+//                             flag2 = false;
+//                             break;
+//                         }
+//                     }
+// Main Loop (Deadlock Detection): The loop iterates over all processes. If a process hasn't finished, it checks if its requested resources can be satisfied with the available resources. If the request is less than or equal to the available resources, the process can be executed.
+// java
+// Copy code
+//                     if(flag2) {
+//                         flag = true;
+//                         for(int j = 0 ; j < totalTypesOfResources ; j++) {
+//                             available[j] += allocatedMatrix[i][j+1];
+//                         }
+//                         finish[i] = true;
+//                         System.out.println("Completed execution of process with Id "+requested[i][0]+". Available Now:"+Arrays.toString(available));
+//                         safeSequence.add(requested[i][0]);
+//                     }
+//                 }
+//             }
+//         }
+// Safe Process Execution: If a process can be executed, it updates the available resources and marks the process as finished. It also adds the process to the safeSequence array.
+// java
+// Copy code
+//         for(boolean element:finish) {
+//             if(!element) {
+//                 System.out.println("The system is in deadlock. Processes that are in deadlock are:");
+//                 for(int[] row:requested) {
+//                     if(!safeSequence.contains(row[0]))
+//                         System.out.println(row[0]);
+//                 }
+//                 System.out.println("Finish:"+Arrays.toString(finish));
+//                 System.exit(1);
+//             }
+//         }
+// Deadlock Detection: After all processes have been checked, if any process is still unfinished, it indicates a deadlock. The processes involved in the deadlock are displayed.
+// java
+// Copy code
+//         System.out.println("The system is in safe state. Safe sequence:" + safeSequence);
+//     }
+// }
+// // Safe Sequence Display: If all processes finish, the program prints the safe sequence of processes.
+// 4. Answering the Generated Questions from Examiner:
+// Explain the concept of deadlock and how it can affect a system.
+
+// Deadlock occurs in a multi-process system when a set of processes are each waiting for resources that are held by another process in the set, and thus none of the processes can proceed. This creates a state where processes are indefinitely stuck. Deadlock can severely impact system performance, causing a complete halt in resource utilization and process execution. It leads to resource wastage and can prevent the system from completing any useful work.
+// How does the system detect deadlock using the provided algorithm?
+
+// The deadlock detection algorithm works by simulating the execution of processes and checking whether any process can complete with the available resources. It uses a finish array to track processes that have completed execution and a safe sequence to identify processes that can execute without causing deadlock. If, at any point, no processes can complete because their requested resources exceed available resources, the algorithm concludes that deadlock has occurred. The processes that cannot proceed are identified as being in deadlock.
+// What is the significance of the available and requested matrices in the deadlock detection algorithm?
+
+// The Available matrix tracks the resources that are free and can be allocated to processes. It represents the resources left after accounting for allocations to running processes. The Requested matrix, on the other hand, represents the remaining resource requests from each process. By comparing the requested resources with the available resources, the algorithm determines if a process can proceed or if it is stuck waiting for resources.
+// How does the algorithm determine if a process can be completed?
+
+// The algorithm checks if the requested resources of a process are less than or equal to the available resources. If this condition holds, the process can be completed. Upon completion, the resources allocated to that process are returned to the system and added to the available resources, potentially allowing other processes to proceed.
+// What does the safeSequence represent, and why is it important in deadlock detection?
+
+// The safe sequence is a list of processes that can be executed without leading to deadlock. It is important because it provides a way to ensure that the system is in a safe state—where each process can eventually get the resources it needs to finish. If a safe sequence can be found, the system avoids deadlock, as all processes can eventually be completed.
+// How does the system handle deadlock by identifying processes that cannot proceed?
+
+// The algorithm detects deadlock by checking whether there are any processes whose requested resources cannot be satisfied by the available resources. If a process cannot complete because its resource requests exceed the available resources, it is considered stuck. The system identifies such processes and flags them as being in deadlock.
+// What would happen if one process always requires more resources than what is available in the system?
+
+// If a process consistently requests more resources than are available in the system, it will never be able to complete its execution. This can lead to a deadlock situation, where the process holds resources while waiting for more, and other processes may also be blocked. The deadlock detection algorithm would identify this situation by noticing that the requested resources cannot be fulfilled, and that process would be flagged as in deadlock.
+// How would you handle a situation where processes arrive dynamically or resources are added dynamically during the execution of this algorithm?
+
+// In a dynamic system, where processes or resources can be added during execution, the deadlock detection algorithm would need to be re-executed periodically or after each change (such as the arrival of a new process or the addition of resources). This ensures that the system remains in a consistent state and can detect potential deadlocks as the resource allocation and process requests change. The system may also need to adjust the available and requested matrices accordingly.
+// Discuss the limitations of this deadlock detection approach.
+
+// The main limitations of the deadlock detection approach in this algorithm are:
+// Performance overhead: Repeated checks for deadlock can be computationally expensive, especially in systems with many processes and resources.
+// Static assumptions: The algorithm assumes a fixed number of processes and resources, which may not be applicable in systems with dynamic processes or resources.
+// No prevention or recovery mechanisms: The algorithm detects deadlock but does not offer a mechanism to prevent or recover from it. Once a deadlock is detected, it must be resolved manually, which may involve terminating or restarting processes.
+// Scalability: For large systems, the number of comparisons required to detect deadlock grows quickly, making this approach inefficient for large-scale systems.

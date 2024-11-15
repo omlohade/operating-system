@@ -1,0 +1,282 @@
+// Sum of digits
+#!/bin/bash
+
+# Function to calculate the sum of digits
+sum_of_digits() {
+    local number=$1
+    local sum=0
+
+    while [ $number -gt 0 ]; do
+        digit=$((number % 10))
+        sum=$((sum + digit))
+        number=$((number / 10))
+    done
+
+    echo "Sum of digits: $sum"
+}
+
+# Read input from user
+read -p "Enter a number: " num
+sum_of_digits $num
+
+// Factorial
+#!/bin/bash
+
+# Function to calculate factorial
+factorial() {
+    local number=$1
+    local fact=1
+
+    for (( i=1; i<=number; i++ )); do
+        fact=$((fact * i))
+    done
+
+    echo "Factorial of $number: $fact"
+}
+
+# Read input from user
+read -p "Enter a number: " num
+factorial $num
+
+// Bubble sort
+#!/bin/bash
+
+# Function to perform bubble sort
+bubble_sort() {
+    local arr=("$@")
+    local n=${#arr[@]}
+
+    for (( i=0; i<n; i++ )); do
+        for (( j=0; j<n-i-1; j++ )); do
+            if [ ${arr[j]} -gt ${arr[j+1]} ]; then
+                # Swap
+                temp=${arr[j]}
+                arr[j]=${arr[j+1]}
+                arr[j+1]=$temp
+            fi
+        done
+    done
+
+    echo "Sorted array: ${arr[@]}"
+}
+
+# Read input from user
+read -p "Enter numbers to sort (space-separated): " -a numbers
+bubble_sort "${numbers[@]}"
+
+
+#!/bin/bash
+
+# Function to perform insertion sort
+insertion_sort() {
+    local arr=("$@")
+    local n=${#arr[@]}
+
+    for (( i=1; i<n; i++ )); do
+        key=${arr[i]}
+        j=$((i - 1))
+
+        # Move elements of arr[0..i-1], that are greater than key,
+        # to one position ahead of their current position
+        while [ $j -ge 0 ] && [ ${arr[j]} -gt $key ]; do
+            arr[$((j + 1))]=${arr[j]}
+            j=$((j - 1))
+        done
+        arr[$((j + 1))]=$key
+    done
+
+    echo "Sorted array: ${arr[@]}"
+}
+
+# Read input from user
+read -p "Enter numbers to sort (space-separated): " -a numbers
+insertion_sort "${numbers[@]}"
+
+
+
+
+1. Sum of Digits Script
+Logic Explanation
+This Bash script calculates the sum of digits of a given number. It extracts each digit by taking the modulus of the number by 10 (number % 10) and adds it to a cumulative sum. Then, it reduces the number by dividing it by 10, removing the last digit. This process continues until there are no more digits to process.
+
+Line-by-Line Explanation
+bash
+Copy code
+#!/bin/bash
+Specifies the interpreter to run the script (bash shell).
+bash
+Copy code
+sum_of_digits() {
+Defines a function called sum_of_digits that accepts one argument (the number).
+bash
+Copy code
+    local number=$1
+    local sum=0
+local number=$1: Initializes number with the first argument passed to the function.
+local sum=0: Initializes sum to 0, which will store the sum of the digits.
+bash
+Copy code
+    while [ $number -gt 0 ]; do
+Begins a loop that continues as long as number is greater than 0.
+bash
+Copy code
+        digit=$((number % 10))
+        sum=$((sum + digit))
+        number=$((number / 10))
+digit=$((number % 10)): Extracts the last digit of number.
+sum=$((sum + digit)): Adds the extracted digit to sum.
+number=$((number / 10)): Removes the last digit from number by dividing it by 10.
+bash
+Copy code
+    done
+    echo "Sum of digits: $sum"
+}
+echo "Sum of digits: $sum": Outputs the final sum after the loop completes.
+bash
+Copy code
+read -p "Enter a number: " num
+sum_of_digits $num
+read -p "Enter a number: " num: Prompts the user to enter a number, storing it in num.
+sum_of_digits $num: Calls sum_of_digits with num as the argument.
+Possible Questions and Answers
+Q: How does while work in this script?
+
+A: while runs as long as the condition (number > 0) is true, allowing continuous processing of each digit until number becomes 0.
+Q: What is local, and why is it used?
+
+A: local restricts the variable scope to the function, preventing number and sum from affecting variables outside the function.
+2. Factorial Script
+Logic Explanation
+This script calculates the factorial of a given number. The factorial of a number n (denoted n!) is the product of all integers from 1 to n. The script initializes fact to 1 and iterates from 1 up to the number, multiplying fact by each integer in that range.
+
+Line-by-Line Explanation
+bash
+Copy code
+#!/bin/bash
+Specifies the interpreter (bash shell).
+bash
+Copy code
+factorial() {
+Defines a function called factorial to calculate the factorial of a given number.
+bash
+Copy code
+    local number=$1
+    local fact=1
+local number=$1: Initializes number with the first argument.
+local fact=1: Initializes fact as 1, the base for multiplication.
+bash
+Copy code
+    for (( i=1; i<=number; i++ )); do
+        fact=$((fact * i))
+    done
+A for loop from i=1 to i=number multiplies fact by each i, accumulating the product in fact.
+bash
+Copy code
+    echo "Factorial of $number: $fact"
+}
+Outputs the calculated factorial.
+bash
+Copy code
+read -p "Enter a number: " num
+factorial $num
+Reads user input and calls the factorial function.
+Possible Questions and Answers
+Q: What is a factorial, and how is it useful?
+
+A: The factorial of a non-negative integer n (denoted n!) is the product of all positive integers up to n. It's used in permutations, combinations, and probability.
+Q: What is for (( ... )) syntax in Bash?
+
+A: It’s a C-style loop syntax in Bash for numeric iteration, allowing control over initialization, condition, and increment.
+3. Bubble Sort Script
+Logic Explanation
+The Bubble Sort algorithm sorts an array by repeatedly swapping adjacent elements if they are in the wrong order. This process is repeated for all elements until no swaps are needed, meaning the array is sorted.
+
+Line-by-Line Explanation
+bash
+Copy code
+#!/bin/bash
+Specifies the interpreter (bash shell).
+bash
+Copy code
+bubble_sort() {
+    local arr=("$@")
+    local n=${#arr[@]}
+local arr=("$@"): Converts all function arguments into an array arr.
+local n=${#arr[@]}: n stores the number of elements in arr.
+bash
+Copy code
+    for (( i=0; i<n; i++ )); do
+        for (( j=0; j<n-i-1; j++ )); do
+            if [ ${arr[j]} -gt ${arr[j+1]} ]; then
+                temp=${arr[j]}
+                arr[j]=${arr[j+1]}
+                arr[j+1]=$temp
+            fi
+        done
+    done
+Two nested loops iterate over arr. For each pair of adjacent elements, it swaps them if they are out of order.
+bash
+Copy code
+    echo "Sorted array: ${arr[@]}"
+}
+Outputs the sorted array.
+bash
+Copy code
+read -p "Enter numbers to sort (space-separated): " -a numbers
+bubble_sort "${numbers[@]}"
+Reads numbers into an array numbers and calls bubble_sort.
+Possible Questions and Answers
+Q: What is Bubble Sort, and why is it inefficient?
+
+A: Bubble Sort is a simple comparison-based sorting algorithm with a time complexity of O(n²). It’s inefficient for large datasets due to repeated swapping of adjacent elements.
+Q: Why do we use nested loops in this script?
+
+A: The outer loop runs for each element, and the inner loop compares each adjacent pair, ensuring that the highest unsorted element moves to the correct position each pass.
+4. Insertion Sort Script
+Logic Explanation
+Insertion Sort builds a sorted array one element at a time. It takes each element from the unsorted part and inserts it into its correct position in the sorted part. This is achieved by shifting elements as needed to make space for the new element.
+
+Line-by-Line Explanation
+bash
+Copy code
+#!/bin/bash
+Specifies the interpreter (bash shell).
+bash
+Copy code
+insertion_sort() {
+    local arr=("$@")
+    local n=${#arr[@]}
+local arr=("$@"): Stores all arguments in an array.
+local n=${#arr[@]}: Gets the length of arr.
+bash
+Copy code
+    for (( i=1; i<n; i++ )); do
+        key=${arr[i]}
+        j=$((i - 1))
+Starts from the second element and iterates through each, setting key as the current element and j as the index before it.
+bash
+Copy code
+        while [ $j -ge 0 ] && [ ${arr[j]} -gt $key ]; do
+            arr[$((j + 1))]=${arr[j]}
+            j=$((j - 1))
+        done
+        arr[$((j + 1))]=$key
+    done
+The while loop shifts elements greater than key to the right, then places key in its sorted position.
+bash
+Copy code
+    echo "Sorted array: ${arr[@]}"
+}
+Outputs the sorted array.
+bash
+Copy code
+read -p "Enter numbers to sort (space-separated): " -a numbers
+insertion_sort "${numbers[@]}"
+Reads the input and calls insertion_sort.
+Possible Questions and Answers
+Q: What is Insertion Sort’s time complexity?
+
+A: The average and worst-case time complexity of Insertion Sort is O(n²), making it less efficient for large datasets. However, it performs well with small or nearly sorted arrays.
+Q: Why does while loop shift elements in Insertion Sort?
+
+A: The while loop shifts elements one position to the right to make space for inserting the key in its correct place.
